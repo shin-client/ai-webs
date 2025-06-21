@@ -141,39 +141,6 @@
       sử dự án gọn gàng và dễ tìm kiếm.
     </p>
 
-    <!-- New Section for Gemini API Integration -->
-    <h2 class="text-3xl font-semibold mt-10 mb-5 pb-2 border-b-2 border-gray-200">
-      ✨ Tạo Commit Message Tự Động với AI
-    </h2>
-    <p class="mb-6 text-gray-700">
-      Mô tả ngắn gọn thay đổi bạn đã thực hiện trong code của mình (ví dụ:
-      "Sửa lỗi hiển thị sản phẩm trên trang chủ", "Thêm tính năng đăng nhập
-      bằng Google"). AI sẽ giúp bạn tạo ra một commit message chuẩn theo quy
-      ước!
-    </p>
-
-    <div class="mb-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
-      <label for="codeChangeDescription" class="block text-gray-800 text-lg font-medium mb-3">Mô tả thay đổi code của bạn:</label>
-      <textarea id="codeChangeDescription" rows="5" class="w-full p-3 border border-blue-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-800" placeholder="Ví dụ: Đã thêm nút 'Thêm vào giỏ hàng' vào trang chi tiết sản phẩm và xử lý logic thêm sản phẩm vào local storage."></textarea>
-      <button id="generateCommitBtn" class="mt-4 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center justify-center">
-        <span id="buttonText">Tạo Commit Message ✨</span>
-        <div id="loader" class="loader ml-3 hidden"></div>
-      </button>
-
-      <div id="generatedCommitContainer" class="mt-6 hidden">
-        <p class="text-gray-800 text-lg font-medium mb-2">
-          Commit Message Đề Xuất:
-        </p>
-        <pre><code id="generatedCommitMessage" class="language-text p-4 rounded-md"></code></pre>
-        <button id="copyCommitBtn" class="mt-3 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
-          Sao chép
-        </button>
-        <span id="copyFeedback" class="ml-3 text-sm text-green-600 hidden">Đã sao chép!</span>
-      </div>
-      <p id="errorMessage" class="text-red-600 mt-4 hidden"></p>
-    </div>
-    <!-- End New Section -->
-
     <h2 class="text-3xl font-semibold mt-10 mb-5 pb-2 border-b-2 border-gray-200">
       Cấu Trúc Cơ Bản của Commit Message
     </h2>
