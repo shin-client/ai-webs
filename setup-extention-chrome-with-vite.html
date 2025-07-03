@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hướng dẫn Tương tác: Cài đặt Chrome Extension với Vite + Bun</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap');
+
+    pre,
+    code {
+      font-family: 'Fira Code', monospace;
+    }
+
+    .sidebar-link.active {
+      background-color: #e0f2fe;
+      color: #0284c7;
+      font-weight: 600;
+      border-left-color: #0284c7;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+  <div class="flex">
+    <aside class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 p-6 hidden md:block">
+      <h1 class="text-xl font-bold text-slate-900">Các bước thực hiện</h1>
+      <nav id="sidebar-nav" class="mt-8 space-y-2">
+        <a href="#step-0" class="sidebar-link block text-slate-600 hover:text-slate-900 py-2 px-3 rounded-lg border-l-4 border-transparent transition-colors duration-200">Giới thiệu</a>
+        <a href="#step-1" class="sidebar-link block text-slate-600 hover:text-slate-900 py-2 px-3 rounded-lg border-l-4 border-transparent transition-colors duration-200">Bước 1: Khởi tạo</a>
+        <a href="#step-2" class="sidebar-link block text-slate-600 hover:text-slate-900 py-2 px-3 rounded-lg border-l-4 border-transparent transition-colors duration-200">Bước 2: Cài đặt Types</a>
+        <a href="#step-3" class="sidebar-link block text-slate-600 hover:text-slate-900 py-2 px-3 rounded-lg border-l-4 border-transparent transition-colors duration-200">Bước 3: Cấu trúc</a>
+        <a href="#step-4" class="sidebar-link block text-slate-600 hover:text-slate-900 py-2 px-3 rounded-lg border-l-4 border-transparent transition-colors duration-200">Bước 4: Tạo Files</a>
+        <a href="#step-5" class="sidebar-link block text-slate-600 hover:text-slate-900 py-2 px-3 rounded-lg border-l-4 border-transparent transition-colors duration-200">Bước 5: Cấu hình Vite</a>
+        <a href="#step-6" class="sidebar-link block text-slate-600 hover:text-slate-900 py-2 px-3 rounded-lg border-l-4 border-transparent transition-colors duration-200">Bước 6: Thêm mã nguồn</a>
+        <a href="#step-7" class="sidebar-link block text-slate-600 hover:text-slate-900 py-2 px-3 rounded-lg border-l-4 border-transparent transition-colors duration-200">Bước 7: Cập nhật Scripts</a>
+        <a href="#step-8" class="sidebar-link block text-slate-600 hover:text-slate-900 py-2 px-3 rounded-lg border-l-4 border-transparent transition-colors duration-200">Bước 8: Build & Tải lên</a>
+      </nav>
+    </aside>
+
+    <main class="w-full md:ml-64 p-6 md:p-10">
+      <div class="max-w-4xl mx-auto">
+        <section id="step-0" class="mb-16 scroll-mt-24">
+          <h2 class="text-3xl font-bold text-slate-900 mb-4 border-b pb-2">Hướng dẫn Cấu hình Chrome Extension với Vite + Bun</h2>
+          <p class="text-lg text-slate-600 mb-4">Chào mừng bạn đến với hướng dẫn tương tác! Trang này sẽ giúp bạn thiết lập một dự án tiện ích mở rộng cho Chrome sử dụng Vite và Bun một cách nhanh chóng. Hãy làm theo từng bước, sử dụng các nút sao chép mã để quá trình được thuận tiện nhất.</p>
+          <div class="bg-sky-100 border-l-4 border-sky-500 text-sky-800 p-4 rounded-r-lg" role="alert">
+            <p class="font-bold">Yêu cầu tiên quyết</p>
+            <p>Đảm bảo bạn đã cài đặt Bun trên máy của mình. Bạn có thể xem hướng dẫn tại <a href="https://bun.sh/" target="_blank" class="underline font-medium">bun.sh</a>.</p>
+          </div>
+        </section>
+
+        <section id="step-1" class="mb-12 scroll-mt-24">
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">Bước 1: Khởi tạo Dự án Vite với Bun</h3>
+          <p class="text-slate-600 mb-4">Sử dụng lệnh `create vite` của Bun để tạo một dự án TypeScript thuần. Các lệnh sau sẽ tạo thư mục dự án, di chuyển vào đó và cài đặt các gói phụ thuộc cần thiết.</p>
+          <div class="code-container relative">
+            <pre class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto"><code class="language-bash">bun create vite@latest my-vite-extension -- --template vanilla-ts
+cd my-vite-extension
+bun install</code></pre>
+            <button class="copy-btn absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold py-1 px-2 rounded">Sao chép</button>
+          </div>
+        </section>
+
+        <section id="step-2" class="mb-12 scroll-mt-24">
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">Bước 2: Cài đặt Gói định nghĩa kiểu cho Chrome</h3>
+          <p class="text-slate-600 mb-4">Để TypeScript hiểu và hỗ trợ tự động hoàn thành cho các API của Chrome (ví dụ: `chrome.runtime`), chúng ta cần cài đặt gói định nghĩa kiểu của nó bằng lệnh sau.</p>
+          <div class="code-container relative">
+            <pre class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto"><code class="language-bash">bun add -d @types/chrome</code></pre>
+            <button class="copy-btn absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold py-1 px-2 rounded">Sao chép</button>
+          </div>
+        </section>
+
+        <section id="step-3" class="mb-12 scroll-mt-24">
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">Bước 3: Cấu trúc lại Thư mục Dự án</h3>
+          <p class="text-slate-600 mb-4">Cấu trúc mặc định của Vite cần được điều chỉnh để phù hợp với một Chrome Extension. Sắp xếp lại các tệp và thư mục của bạn như sau. Bạn sẽ cần đổi tên một số tệp và tạo mới một số tệp khác.</p>
+          <div class="bg-slate-900 text-white p-4 rounded-lg">
+            <pre><code>my-vite-extension/
+├── src/
+│   ├── 📄 background.ts
+│   ├── 📄 content.ts
+│   └── 📄 popup.ts
+├── 📄 popup.html
+├── 📄 manifest.json
+├── 📄 vite.config.ts
+├── 📄 tsconfig.json
+└── 📄 package.json</code></pre>
+          </div>
+        </section>
+
+        <section id="step-4" class="mb-12 scroll-mt-24">
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">Bước 4: Tạo Files</h3>
+          <p class="text-slate-600 mb-4">Bây giờ, hãy tạo nội dung cho các tệp `manifest.json` và `popup.html`.</p>
+          <h4 class="text-xl font-semibold text-slate-800 mt-6 mb-2">1. manifest.json</h4>
+          <p class="text-slate-600 mb-4">Đây là tệp "trái tim" của extension, định nghĩa các thông tin cơ bản và các script sẽ chạy.</p>
+          <div class="code-container relative">
+            <pre class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto"><code class="language-json">{
+  "manifest_version": 3,
+  "name": "My Vite Extension",
+  "version": "1.0.0",
+  "description": "Một tiện ích Chrome được xây dựng bằng Vite và TypeScript.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["&lt;all_urls&gt;"],
+      "js": ["content.js"]
+    }
+  ],
+  "permissions": ["storage"]
+}</code></pre>
+            <button class="copy-btn absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold py-1 px-2 rounded">Sao chép</button>
+          </div>
+          <h4 class="text-xl font-semibold text-slate-800 mt-6 mb-2">2. popup.html</h4>
+          <p class="text-slate-600 mb-4">Đây là tệp HTML sẽ hiển thị khi người dùng nhấp vào biểu tượng của extension.</p>
+          <div class="code-container relative">
+            <pre class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto"><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;title&gt;Vite Extension Popup&lt;/title&gt;
+    &lt;style&gt;
+      body { width: 250px; padding: 10px; font-family: sans-serif; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Vite + TypeScript&lt;/h1&gt;
+    &lt;p&gt;Chào mừng bạn đến với tiện ích Chrome!&lt;/p&gt;
+    &lt;script type="module" src="/src/popup.ts"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            <button class="copy-btn absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold py-1 px-2 rounded">Sao chép</button>
+          </div>
+        </section>
+
+        <section id="step-5" class="mb-12 scroll-mt-24">
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">Bước 5: Cấu hình Vite (`vite.config.ts`)</h3>
+          <p class="text-slate-600 mb-4">Đây là bước quan trọng nhất. Chúng ta cần bảo Vite build tất cả các script (popup, background, content) và sao chép các tệp tĩnh như `manifest.json`. Đầu tiên, cài đặt plugin `vite-plugin-static-copy`.</p>
+          <div class="code-container relative mb-4">
+            <pre class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto"><code class="language-bash">bun add -d vite-plugin-static-copy</code></pre>
+            <button class="copy-btn absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold py-1 px-2 rounded">Sao chép</button>
+          </div>
+          <p class="text-slate-600 mb-4">Sau đó, cập nhật tệp `vite.config.ts` của bạn với nội dung sau:</p>
+          <div class="code-container relative">
+            <pre class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto"><code class="language-typescript">import { defineConfig } from 'vite';
+import { resolve } from 'path';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
+
+export default defineConfig({
+  build: {
+    outDir: 'dist',
+    rollupOptions: {
+      input: {
+        popup: resolve(__dirname, 'popup.html'),
+        background: resolve(__dirname, 'src/background.ts'),
+        content: resolve(__dirname, 'src/content.ts'),
+      },
+      output: {
+        entryFileNames: '[name].js',
+        chunkFileNames: 'chunks/[name].js',
+        assetFileNames: 'assets/[name].[ext]',
+      },
+    },
+  },
+  plugins: [
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'manifest.json',
+          dest: '.'
+        }
+      ]
+    })
+  ]
+});</code></pre>
+            <button class="copy-btn absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold py-1 px-2 rounded">Sao chép</button>
+          </div>
+        </section>
+
+        <section id="step-6" class="mb-12 scroll-mt-24">
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">Bước 6: Thêm Mã nguồn TypeScript</h3>
+          <p class="text-slate-600 mb-4">Thêm một vài dòng mã đơn giản vào các tệp `.ts` để kiểm tra xem mọi thứ có hoạt động không.</p>
+          <div class="code-container relative mb-4">
+            <p class="text-sm font-semibold text-slate-500 bg-slate-800 -mt-4 -mx-4 mb-4 p-2 px-4 border-b border-slate-700">src/popup.ts</p>
+            <pre class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto -mt-4"><code class="language-typescript">console.log("Popup script loaded!");</code></pre>
+            <button class="copy-btn absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold py-1 px-2 rounded">Sao chép</button>
+          </div>
+          <div class="code-container relative mb-4">
+            <p class="text-sm font-semibold text-slate-500 bg-slate-800 -mt-4 -mx-4 mb-4 p-2 px-4 border-b border-slate-700">src/background.ts</p>
+            <pre class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto -mt-4"><code class="language-typescript">chrome.runtime.onInstalled.addListener(() => {
+  console.log("Extension installed with Vite!");
+});</code></pre>
+            <button class="copy-btn absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold py-1 px-2 rounded">Sao chép</button>
+          </div>
+          <div class="code-container relative">
+            <p class="text-sm font-semibold text-slate-500 bg-slate-800 -mt-4 -mx-4 mb-4 p-2 px-4 border-b border-slate-700">src/content.ts</p>
+            <pre class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto -mt-4"><code class="language-typescript">console.log("Content script injected by Vite!");</code></pre>
+            <button class="copy-btn absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold py-1 px-2 rounded">Sao chép</button>
+          </div>
+        </section>
+
+        <section id="step-7" class="mb-12 scroll-mt-24">
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">Bước 7: Cập nhật `package.json`</h3>
+          <p class="text-slate-600 mb-4">Sửa lại mục `scripts` trong tệp `package.json` để có thể build dự án hoặc chạy ở chế độ theo dõi thay đổi (`watch mode`) một cách tiện lợi.</p>
+          <div class="code-container relative">
+            <pre class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto"><code class="language-json">"scripts": {
+  "dev": "vite build --watch",
+  "build": "vite build"
+}</code></pre>
+            <button class="copy-btn absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold py-1 px-2 rounded">Sao chép</button>
+          </div>
+        </section>
+
+        <section id="step-8" class="mb-12 scroll-mt-24">
+          <h3 class="text-2xl font-bold text-slate-900 mb-4">Bước 8: Build và Tải lên Chrome</h3>
+          <p class="text-slate-600 mb-4">Cuối cùng, hãy build dự án của bạn và tải nó lên Chrome để kiểm tra.</p>
+          <ol class="list-decimal list-inside text-slate-600 space-y-3">
+            <li>Chạy lệnh build trong terminal:
+              <div class="code-container relative my-2">
+                <pre class="bg-slate-900 text-white p-4 rounded-lg overflow-x-auto"><code class="language-bash"># Để build một lần cho production
+bun run build
+
+# Hoặc để tự động build lại khi có thay đổi
+bun run dev</code></pre>
+              </div>
+            </li>
+            <li>Một thư mục `dist` sẽ được tạo ra.</li>
+            <li>Mở Chrome, điều hướng đến trang <code class="bg-slate-200 text-slate-700 rounded px-1 py-0.5">chrome://extensions</code>.</li>
+            <li>Bật <strong class="font-semibold">"Chế độ dành cho nhà phát triển"</strong> (Developer mode) ở góc trên bên phải.</li>
+            <li>Nhấp vào nút <strong class="font-semibold">"Tải tiện ích đã giải nén"</strong> (Load unpacked).</li>
+            <li>Chọn thư mục `dist` trong dự án của bạn.</li>
+          </ol>
+          <p class="mt-4 text-slate-600">Nếu mọi thứ thành công, bạn sẽ thấy tiện ích của mình xuất hiện. Chúc mừng!</p>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const copyButtons = document.querySelectorAll('.copy-btn');
+      copyButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const pre = button.previousElementSibling;
+          const code = pre.querySelector('code');
+          const textToCopy = code.innerText;
+
+          navigator.clipboard.writeText(textToCopy).then(() => {
+            const originalText = button.innerText;
+            button.innerText = 'Đã chép!';
+            button.classList.add('bg-green-500');
+            setTimeout(() => {
+              button.innerText = originalText;
+              button.classList.remove('bg-green-500');
+            }, 2000);
+          }).catch(err => {
+            console.error('Không thể sao chép:', err);
+          });
+        });
+      });
+
+      const sections = document.querySelectorAll('section');
+      const navLinks = document.querySelectorAll('#sidebar-nav a');
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            navLinks.forEach(link => {
+              link.classList.remove('active');
+              if (link.getAttribute('href').substring(1) === entry.target.id) {
+                link.classList.add('active');
+              }
+            });
+          }
+        });
+      }, { rootMargin: '-50% 0px -50% 0px' });
+
+      sections.forEach(section => {
+        observer.observe(section);
+      });
+    });
+  </script>
+</body>
+
+</html>
