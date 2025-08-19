@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinh Phục 12 Thì Tiếng Anh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Study -->
+    <!-- Application Structure Plan: A tabbed single-page application with five main sections: 'Tổng Quan' (Overview), 'Tra Cứu Nhanh' (Quick Lookup), 'Lộ Trình Học' (Learning Path), 'So Sánh & Lỗi Sai' (Compare & Correct), and 'Công Cụ' (Tools). This non-linear, task-oriented structure was chosen over a simple scrollable page to empower users to directly access the information they need, whether it's a quick formula lookup, understanding a confusing concept, or finding a learning resource. This improves usability by catering to different user intents (learning, referencing, problem-solving). -->
+    <!-- Visualization & Content Choices: 1. Tense Frequency (Report Info) -> Goal: Inform/Justify -> Viz: Donut Chart -> Interaction: Hover for details -> Justification: Visually emphasizes the importance of core tenses, justifying the phased learning path -> Library: Chart.js. 2. 12 Tenses Table (Report Info) -> Goal: Organize/Inform -> Presentation: Interactive Card Grid -> Interaction: JS-based filtering by Time/Aspect -> Justification: Transforms a static table into a fast, user-controlled reference tool. 3. Learning Path (Report Info) -> Goal: Organize/Guide -> Presentation: Accordion/Collapsible Sections -> Interaction: Click to expand/collapse -> Justification: Presents a structured plan without overwhelming the user with information upfront. 4. Confusing Pairs (Report Info) -> Goal: Compare/Clarify -> Presentation: Side-by-side text blocks -> Interaction: JS to dynamically switch content -> Justification: Provides a focused, direct comparison to address specific, common user problems. -> CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #FDF8F0;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active {
+            border-bottom-color: #FFBF69;
+            color: #d97706; /* amber-600 */
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+        .filter-btn.active {
+            background-color: #FFBF69;
+            color: #4A4A4A;
+            font-weight: 600;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-amber-700">Chinh Phục 12 Thì Tiếng Anh</h1>
+            <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Một công cụ tương tác giúp bạn hiểu sâu, tra cứu nhanh và áp dụng hiệu quả hệ thống ngữ pháp cốt lõi.</p>
+        </header>
+
+        <nav class="flex flex-wrap justify-center gap-4 sm:gap-8 mb-10 border-b pb-4">
+            <button class="nav-link active text-lg font-semibold px-2 py-1" data-target="overview">Tổng Quan</button>
+            <button class="nav-link text-lg font-semibold px-2 py-1" data-target="lookup">Tra Cứu Nhanh</button>
+            <button class="nav-link text-lg font-semibold px-2 py-1" data-target="pathway">Lộ Trình Học</button>
+            <button class="nav-link text-lg font-semibold px-2 py-1" data-target="compare">So Sánh & Lỗi Sai</button>
+            <button class="nav-link text-lg font-semibold px-2 py-1" data-target="tools">Công Cụ</button>
+        </nav>
+
+        <main>
+            <section id="overview" class="content-section active">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-amber-800 mb-4">Một Hệ Thống, Không Phải Một Danh Sách</h2>
+                    <p class="max-w-3xl mx-auto text-gray-700">Thay vì học thuộc 12 thì riêng lẻ, hãy nhìn chúng như một ma trận logic kết hợp giữa 3 Mốc **Thời Gian** (Quá khứ, Hiện tại, Tương lai) và 4 **Khía Cạnh** (Đơn, Tiếp diễn, Hoàn thành, Hoàn thành Tiếp diễn). Hiểu được cấu trúc này là chìa khóa để giải mã ngữ pháp.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-semibold text-center mb-4 text-amber-700">Ma Trận Thời Gian & Khía Cạnh</h3>
+                        <div class="grid grid-cols-4 gap-2 text-center">
+                            <div class="font-bold"></div>
+                            <div class="font-bold p-2 bg-amber-100 rounded-lg">Đơn</div>
+                            <div class="font-bold p-2 bg-blue-100 rounded-lg">Tiếp Diễn</div>
+                            <div class="font-bold p-2 bg-green-100 rounded-lg">Hoàn Thành</div>
+                            <div class="font-bold p-2 bg-purple-100 rounded-lg text-sm">HTTD</div>
+                            
+                            <div class="font-bold p-2 bg-amber-100 rounded-lg">Hiện Tại</div>
+                            <div class="p-2 border rounded-lg">HT Đơn</div>
+                            <div class="p-2 border rounded-lg">HTTD</div>
+                            <div class="p-2 border rounded-lg">HTHT</div>
+                            <div class="p-2 border rounded-lg">HTHTTD</div>
+
+                            <div class="font-bold p-2 bg-amber-100 rounded-lg">Quá Khứ</div>
+                            <div class="p-2 border rounded-lg">QK Đơn</div>
+                            <div class="p-2 border rounded-lg">QKTD</div>
+                            <div class="p-2 border rounded-lg">QKHT</div>
+                            <div class="p-2 border rounded-lg">QKHTTD</div>
+
+                            <div class="font-bold p-2 bg-amber-100 rounded-lg">Tương Lai</div>
+                            <div class="p-2 border rounded-lg">TL Đơn</div>
+                            <div class="p-2 border rounded-lg">TLTD</div>
+                            <div class="p-2 border rounded-lg">TLHT</div>
+                            <div class="p-2 border rounded-lg">TLHTTD</div>
+                        </div>
+                        <p class="mt-4 text-sm text-gray-600 text-center">Mỗi "thì" là sự kết hợp của một hàng và một cột. Ví dụ: (Quá Khứ) + (Hoàn Thành) = Quá Khứ Hoàn Thành.</p>
+                    </div>
+                    <div class="card p-6">
+                         <h3 class="text-2xl font-semibold text-center mb-4 text-amber-700">Tần Suất Sử Dụng Thực Tế</h3>
+                         <p class="text-center text-gray-600 mb-4">Trong văn viết học thuật, chỉ 3 thì đã chiếm phần lớn. Điều này cho thấy tầm quan trọng của việc học có ưu tiên.</p>
+                         <div class="chart-container">
+                            <canvas id="frequencyChart"></canvas>
+                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="lookup" class="content-section">
+                 <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-amber-800 mb-4">Tra Cứu Nhanh 12 Thì</h2>
+                    <p class="max-w-3xl mx-auto text-gray-700">Lọc theo Thời gian hoặc Khía cạnh để nhanh chóng tìm thấy công thức, cách dùng và ví dụ bạn cần.</p>
+                </div>
+                <div class="flex flex-wrap justify-center gap-2 mb-8">
+                    <button class="filter-btn active px-4 py-2 bg-gray-200 rounded-full" data-filter="all">Tất cả</button>
+                    <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-filter="Hiện tại">Hiện tại</button>
+                    <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-filter="Quá khứ">Quá khứ</button>
+                    <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-filter="Tương lai">Tương lai</button>
+                    <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-filter="Đơn">Đơn</button>
+                    <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-filter="Tiếp diễn">Tiếp diễn</button>
+                    <button class="filter-btn px-4 py-2 bg-gray-200 rounded-full" data-filter="Hoàn thành">Hoàn thành</button>
+                </div>
+                <div id="tenses-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </section>
+
+            <section id="pathway" class="content-section">
+                 <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-amber-800 mb-4">Lộ Trình Học Tập Tối Ưu</h2>
+                    <p class="max-w-3xl mx-auto text-gray-700">Học theo 3 giai đoạn để xây dựng nền tảng vững chắc, từ giao tiếp cốt lõi đến việc sử dụng thành thạo các cấu trúc phức tạp.</p>
+                </div>
+                <div class="space-y-6 max-w-4xl mx-auto">
+                    <div class="card">
+                        <button class="accordion-toggle w-full text-left p-6 flex justify-between items-center">
+                            <h3 class="text-2xl font-semibold text-amber-700">Giai Đoạn 1: Nền Tảng Giao Tiếp Cốt Lõi</h3>
+                            <span class="accordion-icon text-2xl font-bold text-amber-700">+</span>
+                        </button>
+                        <div class="accordion-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+                            <div class="p-6 pt-0">
+                                <p class="mb-4 text-gray-600"><strong>Mục tiêu:</strong> Nắm vững các thì có tần suất sử dụng cao nhất để giao tiếp cơ bản.</p>
+                                <ul class="list-disc list-inside space-y-2">
+                                    <li><strong>Hiện tại Đơn:</strong> Nói về sự thật, thói quen, lịch trình.</li>
+                                    <li><strong>Quá khứ Đơn:</strong> Kể lại sự kiện đã kết thúc.</li>
+                                    <li><strong>Tương lai Đơn:</strong> Nói về kế hoạch, dự định.</li>
+                                    <li><strong>Hiện tại Tiếp diễn:</strong> Mô tả hành động đang diễn ra.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="card">
+                        <button class="accordion-toggle w-full text-left p-6 flex justify-between items-center">
+                            <h3 class="text-2xl font-semibold text-amber-700">Giai Đoạn 2: Xây Dựng Mối Liên Kết</h3>
+                            <span class="accordion-icon text-2xl font-bold text-amber-700">+</span>
+                        </button>
+                        <div class="accordion-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+                            <div class="p-6 pt-0">
+                                <p class="mb-4 text-gray-600"><strong>Mục tiêu:</strong> Diễn tả các mối quan hệ phức tạp hơn giữa các hành động và mốc thời gian.</p>
+                                <ul class="list-disc list-inside space-y-2">
+                                    <li><strong>Hiện tại Hoàn thành:</strong> Kết nối quá khứ với hiện tại (kinh nghiệm, kết quả).</li>
+                                    <li><strong>Quá khứ Tiếp diễn:</strong> Mô tả hành động nền và hành động xen vào.</li>
+                                    <li><strong>Quá khứ Hoàn thành:</strong> Sắp xếp thứ tự các hành động trong quá khứ.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="card">
+                        <button class="accordion-toggle w-full text-left p-6 flex justify-between items-center">
+                            <h3 class="text-2xl font-semibold text-amber-700">Giai Đoạn 3: Hoàn Thiện & Nâng Cao</h3>
+                            <span class="accordion-icon text-2xl font-bold text-amber-700">+</span>
+                        </button>
+                        <div class="accordion-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+                             <div class="p-6 pt-0">
+                                <p class="mb-4 text-gray-600"><strong>Mục tiêu:</strong> Nắm vững toàn bộ hệ thống, hiểu các sắc thái tinh tế và sử dụng linh hoạt.</p>
+                                <ul class="list-disc list-inside space-y-2">
+                                    <li><strong>Các thì Hoàn thành Tiếp diễn:</strong> Nhấn mạnh quá trình, sự liên tục.</li>
+                                    <li><strong>Các thì Tương lai phức tạp:</strong> Tương lai Tiếp diễn, Tương lai Hoàn thành.</li>
+                                    <li><strong>Các thì còn lại:</strong> Hoàn thiện bức tranh toàn cảnh.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="compare" class="content-section">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-amber-800 mb-4">So Sánh Các Cặp Thì Dễ Nhầm Lẫn</h2>
+                    <p class="max-w-3xl mx-auto text-gray-700">Hiểu rõ sự khác biệt cốt lõi giữa các cặp thì "kinh điển" để sử dụng chính xác.</p>
+                </div>
+                <div class="flex justify-center gap-4 mb-8">
+                    <button class="compare-btn filter-btn active px-4 py-2 bg-gray-200 rounded-full" data-compare="ps-vs-pp">QK Đơn vs. HT Hoàn thành</button>
+                    <button class="compare-btn filter-btn px-4 py-2 bg-gray-200 rounded-full" data-compare="pp-vs-pap">HT Hoàn thành vs. QK Hoàn thành</button>
+                </div>
+                <div id="comparison-content" class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                </div>
+            </section>
+            
+            <section id="tools" class="content-section">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-amber-800 mb-4">Hệ Sinh Thái Công Cụ Hỗ Trợ</h2>
+                    <p class="max-w-3xl mx-auto text-gray-700">Khám phá các website, ứng dụng và kênh video uy tín đã được tuyển chọn để tối ưu hóa quá trình học tập của bạn.</p>
+                </div>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2">British Council LearnEnglish</h3>
+                        <p class="text-sm text-gray-600 mb-4">Nguồn tài liệu ngữ pháp uy tín, bài bản với bài tập tương tác theo cấp độ.</p>
+                        <a href="https://learnenglish.britishcouncil.org/grammar" target="_blank" class="font-semibold text-amber-600 hover:text-amber-800">Truy cập →</a>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2">Grammarly</h3>
+                        <p class="text-sm text-gray-600 mb-4">Trợ lý ngữ pháp thông minh, sửa lỗi theo thời gian thực khi bạn viết.</p>
+                        <a href="https://www.grammarly.com" target="_blank" class="font-semibold text-amber-600 hover:text-amber-800">Truy cập →</a>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2">LearnEnglish Grammar (App)</h3>
+                        <p class="text-sm text-gray-600 mb-4">Ứng dụng di động với hàng nghìn bài tập để luyện tập mọi lúc, mọi nơi.</p>
+                        <a href="#" class="font-semibold text-gray-400 cursor-not-allowed">Tìm trên App Store</a>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2">5+ English (YouTube)</h3>
+                        <p class="text-sm text-gray-600 mb-4">Kênh video giảng dạy chi tiết, giải thích bằng tiếng Việt, dễ tiếp cận.</p>
+                        <a href="https://www.youtube.com/@5English" target="_blank" class="font-semibold text-amber-600 hover:text-amber-800">Xem kênh →</a>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2">English with Lucy (YouTube)</h3>
+                        <p class="text-sm text-gray-600 mb-4">Học ngữ pháp trong ngữ cảnh tự nhiên với giáo viên bản xứ.</p>
+                        <a href="https://www.youtube.com/c/EnglishwithLucy" target="_blank" class="font-semibold text-amber-600 hover:text-amber-800">Xem kênh →</a>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-bold mb-2">Perfect English Grammar</h3>
+                        <p class="text-sm text-gray-600 mb-4">Website chuyên sâu với nhiều bài giải thích và bài tập có đáp án.</p>
+                        <a href="https://www.perfect-english-grammar.com/" target="_blank" class="font-semibold text-amber-600 hover:text-amber-800">Truy cập →</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const tensesData = [
+            { name: "Hiện tại Đơn", time: "Hiện tại", aspect: "Đơn", formula: "S + V(s/es)", usage: "Diễn tả thói quen, sự thật hiển nhiên, lịch trình.", example: "She works in marketing." },
+            { name: "Hiện tại Tiếp diễn", time: "Hiện tại", aspect: "Tiếp diễn", formula: "S + am/is/are + V-ing", usage: "Hành động đang diễn ra tại thời điểm nói.", example: "They are discussing the report." },
+            { name: "Hiện tại Hoàn thành", time: "Hiện tại", aspect: "Hoàn thành", formula: "S + have/has + V3/ed", usage: "Hành động bắt đầu trong quá khứ, liên quan đến hiện tại.", example: "He has finished the proposal." },
+            { name: "Hiện tại HTTD", time: "Hiện tại", aspect: "Hoàn thành Tiếp diễn", formula: "S + have/has + been + V-ing", usage: "Nhấn mạnh sự liên tục của hành động từ quá khứ đến hiện tại.", example: "We have been waiting for an hour." },
+            { name: "Quá khứ Đơn", time: "Quá khứ", aspect: "Đơn", formula: "S + V2/ed", usage: "Hành động đã xảy ra và kết thúc trong quá khứ.", example: "The company launched a new product." },
+            { name: "Quá khứ Tiếp diễn", time: "Quá khứ", aspect: "Tiếp diễn", formula: "S + was/were + V-ing", usage: "Hành động đang diễn ra tại một thời điểm trong quá khứ.", example: "I was preparing the presentation." },
+            { name: "Quá khứ Hoàn thành", time: "Quá khứ", aspect: "Hoàn thành", formula: "S + had + V3/ed", usage: "Hành động xảy ra trước một hành động khác trong quá khứ.", example: "The meeting had already started." },
+            { name: "Quá khứ HTTD", time: "Quá khứ", aspect: "Hoàn thành Tiếp diễn", formula: "S + had + been + V-ing", usage: "Nhấn mạnh sự liên tục của hành động trước một hành động khác trong quá khứ.", example: "She had been working for days." },
+            { name: "Tương lai Đơn", time: "Tương lai", aspect: "Đơn", formula: "S + will + V", usage: "Quyết định tại thời điểm nói, dự đoán, lời hứa.", example: "I will send you the agenda." },
+            { name: "Tương lai Tiếp diễn", time: "Tương lai", aspect: "Tiếp diễn", formula: "S + will + be + V-ing", usage: "Hành động sẽ đang diễn ra tại một thời điểm trong tương lai.", example: "We will be flying to the conference." },
+            { name: "Tương lai Hoàn thành", time: "Tương lai", aspect: "Hoàn thành", formula: "S + will + have + V3/ed", usage: "Hành động sẽ hoàn thành trước một thời điểm trong tương lai.", example: "We will have completed the first phase." },
+            { name: "Tương lai HTTD", time: "Tương lai", aspect: "Hoàn thành Tiếp diễn", formula: "S + will + have + been + V-ing", usage: "Nhấn mạnh sự liên tục của hành động cho đến một thời điểm trong tương lai.", example: "She will have been working for a decade." }
+        ];
+
+        const comparisons = {
+            'ps-vs-pp': {
+                title1: 'Quá khứ Đơn',
+                content1: `
+                    <h4 class="font-bold text-lg mb-2">Chức năng chính</h4>
+                    <p class="mb-4">Diễn tả hành động đã <strong>xảy ra và kết thúc hoàn toàn</strong> tại một thời điểm xác định trong quá khứ.</p>
+                    <h4 class="font-bold text-lg mb-2">Ví dụ</h4>
+                    <p class="italic">"I <strong>lost</strong> my key <strong>yesterday</strong>."</p>
+                    <p class="text-sm text-gray-600">(Nhấn mạnh hành động xảy ra vào "hôm qua". Sự việc đã khép lại.)</p>
+                `,
+                title2: 'Hiện tại Hoàn thành',
+                content2: `
+                    <h4 class="font-bold text-lg mb-2">Chức năng chính</h4>
+                    <p class="mb-4">Diễn tả hành động có <strong>kết quả hoặc liên quan đến hiện tại</strong>.</p>
+                    <h4 class="font-bold text-lg mb-2">Ví dụ</h4>
+                    <p class="italic">"I <strong>have lost</strong> my key."</p>
+                    <p class="text-sm text-gray-600">(Nhấn mạnh kết quả hiện tại: "bây giờ tôi không vào nhà được".)</p>
+                `
+            },
+            'pp-vs-pap': {
+                title1: 'Hiện tại Hoàn thành',
+                content1: `
+                    <h4 class="font-bold text-lg mb-2">Điểm tham chiếu</h4>
+                    <p class="mb-4">Lấy <strong>HIỆN TẠI (NOW)</strong> làm mốc. Hành động xảy ra trước thời điểm hiện tại.</p>
+                    <h4 class="font-bold text-lg mb-2">Ví dụ</h4>
+                    <p class="italic">"I <strong>have finished</strong> the report."</p>
+                    <p class="text-sm text-gray-600">(Báo cáo đã xong tính đến bây giờ.)</p>
+                `,
+                title2: 'Quá khứ Hoàn thành',
+                content2: `
+                    <h4 class="font-bold text-lg mb-2">Điểm tham chiếu</h4>
+                    <p class="mb-4">Lấy một <strong>MỐC TRONG QUÁ KHỨ</strong> làm mốc. Hành động (A) xảy ra trước mốc đó (B).</p>
+                    <h4 class="font-bold text-lg mb-2">Ví dụ</h4>
+                    <p class="italic">"I <strong>had finished</strong> the report <strong>before the deadline</strong>."</p>
+                    <p class="text-sm text-gray-600">(Báo cáo đã xong trước "hạn chót" trong quá khứ.)</p>
+                `
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.content-section');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const tensesGrid = document.getElementById('tenses-grid');
+            const accordions = document.querySelectorAll('.accordion-toggle');
+            const compareBtns = document.querySelectorAll('.compare-btn');
+            const comparisonContent = document.getElementById('comparison-content');
+
+            function renderTenses(filter = 'all') {
+                tensesGrid.innerHTML = '';
+                const filteredTenses = tensesData.filter(tense => {
+                    if (filter === 'all') return true;
+                    if (filter === 'Hoàn thành') return tense.aspect.includes('Hoàn thành');
+                    return tense.time === filter || tense.aspect === filter;
+                });
+                
+                filteredTenses.forEach(tense => {
+                    const tenseCard = `
+                        <div class="card p-6 flex flex-col">
+                            <h3 class="text-xl font-bold text-amber-700">${tense.name}</h3>
+                            <p class="font-mono text-blue-600 my-2">${tense.formula}</p>
+                            <p class="text-gray-600 flex-grow">${tense.usage}</p>
+                            <p class="italic mt-4 text-gray-800">VD: ${tense.example}</p>
+                        </div>
+                    `;
+                    tensesGrid.innerHTML += tenseCard;
+                });
+            }
+
+            function renderComparison(type) {
+                const data = comparisons[type];
+                comparisonContent.innerHTML = `
+                    <div class="card p-6 border-t-4 border-blue-400">
+                        <h3 class="text-2xl font-bold text-blue-600 mb-4">${data.title1}</h3>
+                        ${data.content1}
+                    </div>
+                    <div class="card p-6 border-t-4 border-green-400">
+                        <h3 class="text-2xl font-bold text-green-600 mb-4">${data.title2}</h3>
+                        ${data.content2}
+                    </div>
+                `;
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    const targetId = link.dataset.target;
+                    sections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === targetId) {
+                            section.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if(btn.dataset.filter) {
+                        filterBtns.forEach(b => {
+                           if(b.dataset.filter) b.classList.remove('active');
+                        });
+                        btn.classList.add('active');
+                        renderTenses(btn.dataset.filter);
+                    }
+                });
+            });
+
+            accordions.forEach(accordion => {
+                accordion.addEventListener('click', () => {
+                    const content = accordion.nextElementSibling;
+                    const icon = accordion.querySelector('.accordion-icon');
+                    
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.textContent = '+';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.textContent = '-';
+                    }
+                });
+            });
+
+            compareBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    compareBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderComparison(btn.dataset.compare);
+                });
+            });
+
+            const ctx = document.getElementById('frequencyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['HT Đơn, QK Đơn, HT Hoàn thành', '9 Thì Còn Lại'],
+                    datasets: [{
+                        label: 'Tần Suất Sử Dụng',
+                        data: [90, 10],
+                        backgroundColor: [
+                            '#FFBF69',
+                            '#A0C4FF',
+                        ],
+                        borderColor: [
+                            '#FFFFFF',
+                            '#FFFFFF'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += `~${context.parsed}%`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            renderTenses();
+            renderComparison('ps-vs-pp');
+        });
+    </script>
+</body>
+</html>

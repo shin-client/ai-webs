@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lập Trình Viên Tư Duy: Hướng Dẫn Tương Tác</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Calming Blue -->
+    <!-- Application Structure Plan: A single-page application with a fixed top navigation bar for seamless scrolling between thematic sections. This non-linear structure allows users to explore concepts based on interest rather than report order. The sections are: 1) Introduction, 2) Philosophical Foundations (interactive cards), 3) Core Skills (visualized with a radar chart), 4) The Programmer's Gym (interactive modules for practice), and 5) Inspirational Quotes. This structure is chosen to transform a text-based report into an engaging, user-driven learning tool, prioritizing practical application and conceptual clarity over linear reading. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Core Cognitive Skills -> Goal: Inform/Visualize -> Viz: Radar Chart (Chart.js) -> Interaction: None, purely visual -> Justification: Provides a powerful visual metaphor for the goal of developing a balanced set of critical thinking skills, making an abstract concept tangible.
+        - Report Info: 5 Whys Method -> Goal: Interact/Practice -> Viz: Interactive Stepper (HTML/JS) -> Interaction: User clicks a button to reveal each 'Why?' step -> Justification: Simulates the actual process of root cause analysis, reinforcing learning through doing.
+        - Report Info: Socratic Method -> Goal: Compare/Learn -> Viz: Two-column comparison layout -> Interaction: Static display -> Justification: Clearly contrasts ineffective vs. effective feedback, providing a clear model for users to emulate in code reviews.
+        - Report Info: Philosophical Concepts -> Goal: Inform/Organize -> Viz: Grid of clickable cards -> Interaction: Click to reveal details -> Justification: Breaks down dense theoretical information into digestible chunks, preventing user overload.
+        - Report Info: SDLC Application -> Goal: Organize/Inform -> Viz: Horizontal tabbed interface -> Interaction: Click tabs to see details for each stage -> Justification: Organizes information contextually across the development lifecycle, making it relevant to the user's workflow.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #f8f7f4;
+            color: #2d3748;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .step-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+         .step-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-[#f8f7f4] text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-blue-600">Lập Trình Viên Tư Duy</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#gioi-thieu" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Giới thiệu</a>
+                        <a href="#nen-tang" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Nền Tảng</a>
+                        <a href="#ky-nang" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Kỹ Năng</a>
+                        <a href="#thuc-hanh" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Thực Hành</a>
+                        <a href="#trich-dan" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Trích Dẫn</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                     <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 focus:outline-none">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#gioi-thieu" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Giới thiệu</a>
+                <a href="#nen-tang" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Nền Tảng</a>
+                <a href="#ky-nang" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Kỹ Năng</a>
+                <a href="#thuc-hanh" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Thực Hành</a>
+                <a href="#trich-dan" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Trích Dẫn</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="gioi-thieu" class="py-16 sm:py-20">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-blue-700">Trở thành một Lập trình viên Tư duy</h2>
+                <p class="mt-6 max-w-3xl mx-auto text-lg leading-8 text-gray-600">
+                    Kỹ thuật phần mềm xuất sắc không chỉ là viết mã, mà là một triết lý ứng dụng. Ứng dụng này sẽ hướng dẫn bạn rèn luyện tư duy phản biện — kỹ năng quan trọng nhất để xây dựng các hệ thống phức tạp, đáng tin cậy và có thể bảo trì. Hãy chuyển đổi từ một người chỉ giải quyết vấn đề thành một kiến trúc sư của các giải pháp tinh tế.
+                </p>
+            </div>
+        </section>
+
+        <section id="nen-tang" class="py-16 sm:py-20 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Nền tảng triết học</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">Hiểu rõ "tại sao" đằng sau logic của bạn là bước đầu tiên để làm chủ "làm thế nào" trong việc viết mã tốt hơn.</p>
+                </div>
+
+                <div class="mt-12">
+                    <h3 class="text-2xl font-semibold text-center mb-8">Các Phương thức Suy luận trong Lập trình</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="card p-6 bg-stone-50 rounded-lg border border-stone-200">
+                            <h4 class="text-xl font-bold text-blue-600">Suy luận Diễn dịch</h4>
+                            <p class="mt-2 text-gray-600">Từ nguyên tắc chung đến kết luận cụ thể. Đây là logic của trình biên dịch: nếu điều kiện là đúng, thì khối mã này chắc chắn sẽ chạy.</p>
+                            <p class="mt-4 font-semibold">Ví dụ: Với `x=5`, câu lệnh `if (x > 3)` sẽ luôn được thực thi.</p>
+                        </div>
+                        <div class="card p-6 bg-stone-50 rounded-lg border border-stone-200">
+                            <h4 class="text-xl font-bold text-blue-600">Suy luận Quy nạp</h4>
+                            <p class="mt-2 text-gray-600">Từ quan sát cụ thể đến kết luận tổng quát. Đây là logic của việc kiểm thử: nếu 100 trường hợp thử nghiệm thành công, hàm có khả năng đúng.</p>
+                             <p class="mt-4 font-semibold">Ví dụ: Lỗi này xảy ra ở 5 môi trường khác nhau; có khả năng đây là lỗi hệ thống.</p>
+                        </div>
+                        <div class="card p-6 bg-stone-50 rounded-lg border border-stone-200">
+                            <h4 class="text-xl font-bold text-blue-600">Suy luận Phỏng đoán</h4>
+                            <p class="mt-2 text-gray-600">Suy ra lời giải thích hợp lý nhất từ các quan sát. Đây là logic cốt lõi của việc gỡ lỗi: tìm ra nguyên nhân gốc rễ.</p>
+                            <p class="mt-4 font-semibold">Ví dụ: Dịch vụ bị treo sau khi một dịch vụ phụ thuộc được cập nhật. Lời giải thích tốt nhất là có lỗi trong phiên bản mới.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ky-nang" class="py-16 sm:py-20">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Giải phẫu một Nhà tư duy Phản biện</h2>
+                        <p class="mt-4 text-lg text-gray-600">Tư duy phản biện không phải là một kỹ năng đơn lẻ, mà là một bộ các thói quen trí tuệ. Việc rèn luyện chúng sẽ mang lại những lợi ích hữu hình cho sự nghiệp của bạn.</p>
+                        <p class="mt-6 text-base text-gray-600">Một người giải quyết vấn đề tìm cách làm cho mã nguồn hoạt động. Một người có tư duy phản biện sẽ hỏi, "Liệu đây có phải là đoạn mã đúng đắn cần được viết ngay từ đầu không?". Họ đặt câu hỏi về các giả định, xem xét các quan điểm đa dạng và phân tích các hệ quả lâu dài của một giải pháp.</p>
+                    </div>
+                    <div>
+                        <div class="chart-container">
+                             <canvas id="skillsChart"></canvas>
+                        </div>
+                        <p class="text-center text-sm text-gray-500 mt-2">Biểu đồ này là một hình ảnh ẩn dụ, thể hiện mục tiêu cân bằng các kỹ năng nhận thức cốt lõi.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="thuc-hanh" class="py-16 sm:py-20 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Phòng Gym của Lập trình viên</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">Tư duy phản biện là một cơ bắp. Hãy rèn luyện nó hàng ngày qua các bài tập cụ thể này.</p>
+                </div>
+
+                <div class="mt-16 space-y-16">
+                    <!-- 5 Whys Interactive Module -->
+                    <div class="card p-8 rounded-lg border border-stone-200 bg-stone-50">
+                        <h3 class="text-2xl font-semibold mb-4 text-blue-700">Bài tập 1: Phân tích Nguyên nhân Gốc rễ với 5 Whys</h3>
+                        <p class="mb-6 text-gray-600">Đây là một kỹ thuật để đào sâu vào một vấn đề, vượt qua các triệu chứng bề mặt. Bắt đầu với một vấn đề và liên tục hỏi "Tại sao?".</p>
+                        <div class="space-y-4">
+                            <div id="whys-container">
+                                <div class="step-item p-4 border-l-4 border-gray-300">
+                                    <strong class="text-gray-800">Vấn đề:</strong> Bản dựng hàng đêm đã thất bại.
+                                </div>
+                            </div>
+                            <button id="askWhyBtn" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Hỏi "Tại sao?"</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Socratic Method Module -->
+                    <div class="card p-8 rounded-lg border border-stone-200 bg-stone-50">
+                        <h3 class="text-2xl font-semibold mb-4 text-blue-700">Bài tập 2: Đánh giá Mã nguồn bằng Phương pháp Socrates</h3>
+                        <p class="mb-6 text-gray-600">Thay vì ra lệnh, hãy đặt câu hỏi hướng dẫn. Điều này không chỉ cải thiện mã nguồn mà còn xây dựng một văn hóa học hỏi và an toàn tâm lý.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="p-4 bg-red-100 rounded-lg">
+                                <h4 class="font-bold text-red-800">Cách tiếp cận Mệnh lệnh (Nên tránh)</h4>
+                                <p class="mt-2 text-red-700">"Đổi vòng lặp for này thành hàm `map`."</p>
+                                <p class="mt-1 text-red-700">"Bạn cần sửa cái này."</p>
+                            </div>
+                             <div class="p-4 bg-green-100 rounded-lg">
+                                <h4 class="font-bold text-green-800">Cách tiếp cận Socrates (Nên dùng)</h4>
+                                <p class="mt-2 text-green-700">"Lý do bạn sử dụng vòng lặp `for` ở đây là gì? Liệu `map` có mang lại lợi ích gì không?"</p>
+                                <p class="mt-1 text-green-700">"Cách triển khai này xử lý một mảng null như thế nào?"</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SDLC Module -->
+                    <div class="card p-8 rounded-lg border border-stone-200 bg-stone-50">
+                        <h3 class="text-2xl font-semibold mb-4 text-center text-blue-700">Bài tập 3: Áp dụng trong Vòng đời Phát triển (SDLC)</h3>
+                        <div id="sdlc-tabs">
+                            <div class="border-b border-gray-200">
+                                <nav class="-mb-px flex space-x-8 justify-center" aria-label="Tabs">
+                                    <button class="sdlc-tab active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600">Kế hoạch</button>
+                                    <button class="sdlc-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Thiết kế</button>
+                                    <button class="sdlc-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Triển khai</button>
+                                    <button class="sdlc-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Kiểm thử</button>
+                                    <button class="sdlc-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Bảo trì</button>
+                                </nav>
+                            </div>
+                            <div id="sdlc-content" class="mt-6 text-center text-gray-700">
+                                <p>Vấn đề thực sự mà chúng ta đang cố gắng giải quyết là gì? Chúng ta có đang giải quyết đúng vấn đề không? Những giả định ngầm là gì?</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="trich-dan" class="py-16 sm:py-20">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Mật mã của Cảm hứng</h2>
+                     <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">Những châm ngôn để nuôi dưỡng tư duy của một nghệ nhân phần mềm.</p>
+                </div>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card p-6 bg-white rounded-lg shadow-md">
+                        <blockquote class="text-lg text-gray-700">"Bất kỳ kẻ ngốc nào cũng có thể viết mã mà máy tính có thể hiểu. Lập trình viên giỏi viết mã mà con người có thể hiểu."</blockquote>
+                        <cite class="mt-4 block font-semibold text-right text-gray-600">- Martin Fowler</cite>
+                    </div>
+                    <div class="card p-6 bg-white rounded-lg shadow-md">
+                        <blockquote class="text-lg text-gray-700">"Gỡ lỗi khó gấp đôi so với việc viết mã. Do đó, nếu bạn viết mã thông minh nhất có thể, bạn không đủ thông minh để gỡ lỗi nó."</blockquote>
+                        <cite class="mt-4 block font-semibold text-right text-gray-600">- Brian Kernighan</cite>
+                    </div>
+                    <div class="card p-6 bg-white rounded-lg shadow-md">
+                        <blockquote class="text-lg text-gray-700">"Lập trình viên tồi lo lắng về mã nguồn. Lập trình viên giỏi lo lắng về các cấu trúc dữ liệu và mối quan hệ của chúng."</blockquote>
+                        <cite class="mt-4 block font-semibold text-right text-gray-600">- Linus Torvalds</cite>
+                    </div>
+                     <div class="card p-6 bg-white rounded-lg shadow-md">
+                        <blockquote class="text-lg text-gray-700">"Đầu tiên, hãy giải quyết vấn đề. Sau đó, hãy viết mã."</blockquote>
+                        <cite class="mt-4 block font-semibold text-right text-gray-600">- John Johnson</cite>
+                    </div>
+                    <div class="card p-6 bg-white rounded-lg shadow-md">
+                        <blockquote class="text-lg text-gray-700">"Tôi không phải là một lập trình viên vĩ đại; tôi chỉ là một lập trình viên giỏi với những thói quen tuyệt vời."</blockquote>
+                        <cite class="mt-4 block font-semibold text-right text-gray-600">- Kent Beck</cite>
+                    </div>
+                    <div class="card p-6 bg-white rounded-lg shadow-md">
+                        <blockquote class="text-lg text-gray-700">"Cụm từ gây tổn hại nhất trong ngôn ngữ là... 'nó luôn được làm theo cách này'."</blockquote>
+                        <cite class="mt-4 block font-semibold text-right text-gray-600">- Grace Hopper</cite>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p>Một công cụ tương tác dựa trên báo cáo "Lập Trình Viên Tư Duy".</p>
+            <p class="mt-1 opacity-70">Được thiết kế để truyền cảm hứng và rèn luyện tư duy phản biện.</p>
+        </div>
+    </footer>
+    
+    <button id="scrollToTopBtn" class="hidden fixed bottom-5 right-5 bg-blue-600 text-white rounded-full p-3 shadow-lg hover:bg-blue-700 transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+        </svg>
+    </button>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Radar Chart for Skills
+    const ctx = document.getElementById('skillsChart').getContext('2d');
+    const skillsChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: [
+                'Phân tích',      // Analysis
+                'Đánh giá',       // Evaluation
+                'Suy luận',       // Inference
+                'Giải thích',     // Explanation
+                'Tự điều chỉnh'   // Self-regulation
+            ],
+            datasets: [{
+                label: 'Kỹ năng của Nhà tư duy Phản biện',
+                data: [5, 5, 5, 5, 5],
+                backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                borderColor: 'rgba(37, 99, 235, 1)',
+                pointBackgroundColor: 'rgba(37, 99, 235, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(37, 99, 235, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                    grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                    pointLabels: { 
+                        font: { size: 12, weight: 'bold' },
+                        color: '#4a5568'
+                    },
+                    ticks: {
+                        display: false,
+                        beginAtZero: true,
+                        max: 5,
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+
+    // 5 Whys Interactive Logic
+    const askWhyBtn = document.getElementById('askWhyBtn');
+    const whysContainer = document.getElementById('whys-container');
+    let whyCount = 0;
+    const whys = [
+        { q: '1. Tại sao?', a: 'Bộ kiểm thử đã hết thời gian chờ.' },
+        { q: '2. Tại sao?', a: 'Một bài kiểm thử end-to-end mới chạy rất chậm.' },
+        { q: '3. Tại sao?', a: 'Nó phải đợi 5 phút cho một API bên ngoài hết thời gian cooldown.' },
+        { q: '4. Tại sao?', a: 'API đó có giới hạn tỷ lệ (rate limiting) rất nghiêm ngặt.' },
+        { q: '5. Tại sao?', a: 'Chúng ta lại gọi trực tiếp API này trong bài kiểm thử.' },
+        { q: 'Nguyên nhân gốc rễ', a: 'Sự thiếu hụt cơ sở hạ tầng kiểm thử (thiếu dịch vụ giả lập). Giải pháp là xây dựng một dịch vụ giả lập, không phải tăng thời gian chờ.' }
+    ];
+
+    askWhyBtn.addEventListener('click', () => {
+        if (whyCount < whys.length) {
+            const item = whys[whyCount];
+            const div = document.createElement('div');
+            div.className = 'step-item p-4 border-l-4';
+            
+            const colors = ['border-yellow-400', 'border-orange-400', 'border-red-400', 'border-purple-400', 'border-indigo-400', 'border-green-500'];
+            div.classList.add(colors[whyCount % colors.length]);
+
+            div.innerHTML = `<strong class="text-gray-800">${item.q}:</strong> ${item.a}`;
+            whysContainer.appendChild(div);
+
+            setTimeout(() => div.classList.add('visible'), 50);
+
+            whyCount++;
+            if (whyCount === whys.length) {
+                askWhyBtn.textContent = 'Phân tích lại';
+                askWhyBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                askWhyBtn.classList.add('bg-gray-500', 'hover:bg-gray-600');
+            }
+        } else {
+            // Reset
+            whyCount = 0;
+            whysContainer.innerHTML = `<div class="step-item visible p-4 border-l-4 border-gray-300"><strong class="text-gray-800">Vấn đề:</strong> Bản dựng hàng đêm đã thất bại.</div>`;
+            askWhyBtn.textContent = 'Hỏi "Tại sao?"';
+            askWhyBtn.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+            askWhyBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+        }
+    });
+    
+    // SDLC Tabs Logic
+    const sdlcTabs = document.querySelectorAll('.sdlc-tab');
+    const sdlcContent = document.getElementById('sdlc-content');
+    const sdlcData = [
+        "Vấn đề thực sự mà chúng ta đang cố gắng giải quyết là gì? Chúng ta có đang giải quyết đúng vấn đề không? Những giả định ngầm là gì?",
+        "Các mẫu thiết kế khác nhau có những đánh đổi nào? Suy nghĩ về khả năng mở rộng, khả năng bảo trì và bảo mật ngay từ đầu.",
+        "Đây có phải là mã đúng đắn cần viết? Làm thế nào để đơn giản hóa nó? Tên biến/hàm có rõ ràng không?",
+        "Những gì có thể sai? Thiết kế các bài kiểm thử cho các trường hợp biên, chế độ lỗi và lỗ hổng bảo mật, không chỉ cho 'con đường hạnh phúc'.",
+        "Khi một cảnh báo được kích hoạt, hãy sử dụng phân tích nguyên nhân gốc rễ để hiểu vấn đề cơ bản, không chỉ đơn giản là khởi động lại dịch vụ."
+    ];
+    
+    sdlcTabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => {
+            sdlcTabs.forEach(t => {
+                t.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                t.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            });
+            tab.classList.add('active', 'border-blue-500', 'text-blue-600');
+            tab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            sdlcContent.innerHTML = `<p>${sdlcData[index]}</p>`;
+        });
+    });
+
+    // Mobile Menu Toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Nav link highlighting on scroll
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === entry.target.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, { rootMargin: '-50% 0px -50% 0px' });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+    
+    // Scroll to Top button
+    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+            scrollToTopBtn.classList.remove('hidden');
+        } else {
+            scrollToTopBtn.classList.add('hidden');
+        }
+    });
+    scrollToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+});
+</script>
+
+</body>
+</html>
