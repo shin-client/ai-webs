@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Tra Động Từ Bất Quy Tắc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md bg-white rounded-xl card-shadow p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Tra Động Từ</h1>
+            <p class="text-gray-500 mt-2">Nhập một động từ nguyên mẫu để tra cứu dạng V2 và V3.</p>
+        </div>
+
+        <!-- Input and Button -->
+        <div class="flex flex-col sm:flex-row gap-3">
+            <input type="text" id="verbInput" placeholder="Ví dụ: go, study, work..." class="flex-grow w-full px-4 py-3 text-lg text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+            <button id="checkButton" class="w-full sm:w-auto bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 ease-in-out transform hover:scale-105">
+                Kiểm Tra
+            </button>
+        </div>
+
+        <!-- Result Display -->
+        <div id="result" class="mt-8 min-h-[120px] p-5 bg-gray-50 rounded-lg border border-dashed border-gray-300 flex items-center justify-center">
+             <p class="text-gray-400">Kết quả sẽ hiển thị ở đây...</p>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA: Comprehensive Irregular Verbs List ---
+        // This is a more exhaustive list of irregular verbs.
+        const irregularVerbs = {
+            "abide": { v2: "abode", v3: "abode" },
+            "arise": { v2: "arose", v3: "arisen" },
+            "awake": { v2: "awoke", v3: "awoken" },
+            "be": { v2: "was/were", v3: "been" },
+            "bear": { v2: "bore", v3: "born/borne" },
+            "beat": { v2: "beat", v3: "beaten" },
+            "become": { v2: "became", v3: "become" },
+            "befall": { v2: "befell", v3: "befallen" },
+            "beget": { v2: "begot", v3: "begotten" },
+            "begin": { v2: "began", v3: "begun" },
+            "behold": { v2: "beheld", v3: "beheld" },
+            "bend": { v2: "bent", v3: "bent" },
+            "bereave": { v2: "bereft/bereaved", v3: "bereft/bereaved" },
+            "beseech": { v2: "besought/beseeched", v3: "besought/beseeched" },
+            "bet": { v2: "bet", v3: "bet" },
+            "bid": { v2: "bid/bade", v3: "bid/bidden" },
+            "bind": { v2: "bound", v3: "bound" },
+            "bite": { v2: "bit", v3: "bitten" },
+            "bleed": { v2: "bled", v3: "bled" },
+            "blow": { v2: "blew", v3: "blown" },
+            "break": { v2: "broke", v3: "broken" },
+            "breed": { v2: "bred", v3: "bred" },
+            "bring": { v2: "brought", v3: "brought" },
+            "broadcast": { v2: "broadcast", v3: "broadcast" },
+            "browbeat": { v2: "browbeat", v3: "browbeaten" },
+            "build": { v2: "built", v3: "built" },
+            "burn": { v2: "burnt/burned", v3: "burnt/burned" },
+            "burst": { v2: "burst", v3: "burst" },
+            "bust": { v2: "bust/busted", v3: "bust/busted" },
+            "buy": { v2: "bought", v3: "bought" },
+            "cast": { v2: "cast", v3: "cast" },
+            "catch": { v2: "caught", v3: "caught" },
+            "chide": { v2: "chid/chided", v3: "chid/chidden/chided" },
+            "choose": { v2: "chose", v3: "chosen" },
+            "cleave": { v2: "clove/cleft/cleaved", v3: "cloven/cleft/cleaved" },
+            "cling": { v2: "clung", v3: "clung" },
+            "come": { v2: "came", v3: "come" },
+            "cost": { v2: "cost", v3: "cost" },
+            "creep": { v2: "crept", v3: "crept" },
+            "cut": { v2: "cut", v3: "cut" },
+            "deal": { v2: "dealt", v3: "dealt" },
+            "dig": { v2: "dug", v3: "dug" },
+            "disprove": { v2: "disproved", v3: "disproved/disproven" },
+            "dive": { v2: "dove/dived", v3: "dived" },
+            "do": { v2: "did", v3: "done" },
+            "draw": { v2: "drew", v3: "drawn" },
+            "dream": { v2: "dreamt/dreamed", v3: "dreamt/dreamed" },
+            "drink": { v2: "drank", v3: "drunk" },
+            "drive": { v2: "drove", v3: "driven" },
+            "dwell": { v2: "dwelt/dwelled", v3: "dwelt/dwelled" },
+            "eat": { v2: "ate", v3: "eaten" },
+            "fall": { v2: "fell", v3: "fallen" },
+            "feed": { v2: "fed", v3: "fed" },
+            "feel": { v2: "felt", v3: "felt" },
+            "fight": { v2: "fought", v3: "fought" },
+            "find": { v2: "found", v3: "found" },
+            "fit": { v2: "fit/fitted", v3: "fit/fitted" },
+            "flee": { v2: "fled", v3: "fled" },
+            "fling": { v2: "flung", v3: "flung" },
+            "fly": { v2: "flew", v3: "flown" },
+            "forbid": { v2: "forbade", v3: "forbidden" },
+            "forecast": { v2: "forecast", v3: "forecast" },
+            "foresee": { v2: "foresaw", v3: "foreseen" },
+            "foretell": { v2: "foretold", v3: "foretold" },
+            "forget": { v2: "forgot", v3: "forgotten" },
+            "forgive": { v2: "forgave", v3: "forgiven" },
+            "forsake": { v2: "forsook", v3: "forsaken" },
+            "freeze": { v2: "froze", v3: "frozen" },
+            "get": { v2: "got", v3: "got/gotten" },
+            "give": { v2: "gave", v3: "given" },
+            "go": { v2: "went", v3: "gone" },
+            "grind": { v2: "ground", v3: "ground" },
+            "grow": { v2: "grew", v3: "grown" },
+            "hamstring": { v2: "hamstrung", v3: "hamstrung" },
+            "hang": { v2: "hung", v3: "hung" },
+            "have": { v2: "had", v3: "had" },
+            "hear": { v2: "heard", v3: "heard" },
+            "heave": { v2: "hove/heaved", v3: "hove/heaved" },
+            "hew": { v2: "hewed", v3: "hewn/hewed" },
+            "hide": { v2: "hid", v3: "hidden" },
+            "hit": { v2: "hit", v3: "hit" },
+            "hold": { v2: "held", v3: "held" },
+            "hurt": { v2: "hurt", v3: "hurt" },
+            "inlay": { v2: "inlaid", v3: "inlaid" },
+            "input": { v2: "input/inputted", v3: "input/inputted" },
+            "interweave": { v2: "interwove", v3: "interwoven" },
+            "keep": { v2: "kept", v3: "kept" },
+            "kneel": { v2: "knelt/kneeled", v3: "knelt/kneeled" },
+            "knit": { v2: "knit/knitted", v3: "knit/knitted" },
+            "know": { v2: "knew", v3: "known" },
+            "lay": { v2: "laid", v3: "laid" },
+            "lead": { v2: "led", v3: "led" },
+            "lean": { v2: "leant/leaned", v3: "leant/leaned" },
+            "leap": { v2: "leapt/leaped", v3: "leapt/leaped" },
+            "learn": { v2: "learnt/learned", v3: "learnt/learned" },
+            "leave": { v2: "left", v3: "left" },
+            "lend": { v2: "lent", v3: "lent" },
+            "let": { v2: "let", v3: "let" },
+            "lie": { v2: "lay", v3: "lain" },
+            "light": { v2: "lit/lighted", v3: "lit/lighted" },
+            "lose": { v2: "lost", v3: "lost" },
+            "make": { v2: "made", v3: "made" },
+            "mean": { v2: "meant", v3: "meant" },
+            "meet": { v2: "met", v3: "met" },
+            "mislead": { v2: "misled", v3: "misled" },
+            "mistake": { v2: "mistook", v3: "mistaken" },
+            "mow": { v2: "mowed", v3: "mown/mowed" },
+            "overcome": { v2: "overcame", v3: "overcome" },
+            "pay": { v2: "paid", v3: "paid" },
+            "plead": { v2: "pled/pleaded", v3: "pled/pleaded" },
+            "prove": { v2: "proved", v3: "proven/proved" },
+            "put": { v2: "put", v3: "put" },
+            "quit": { v2: "quit", v3: "quit" },
+            "read": { v2: "read", v3: "read" },
+            "rid": { v2: "rid", v3: "rid" },
+            "ride": { v2: "rode", v3: "ridden" },
+            "ring": { v2: "rang", v3: "rung" },
+            "rise": { v2: "rose", v3: "risen" },
+            "run": { v2: "ran", v3: "run" },
+            "saw": { v2: "sawed", v3: "sawn/sawed" },
+            "say": { v2: "said", v3: "said" },
+            "see": { v2: "saw", v3: "seen" },
+            "seek": { v2: "sought", v3: "sought" },
+            "sell": { v2: "sold", v3: "sold" },
+            "send": { v2: "sent", v3: "sent" },
+            "set": { v2: "set", v3: "set" },
+            "sew": { v2: "sewed", v3: "sewn/sewed" },
+            "shake": { v2: "shook", v3: "shaken" },
+            "shave": { v2: "shaved", v3: "shaven/shaved" },
+            "shear": { v2: "shore/sheared", v3: "shorn/sheared" },
+            "shed": { v2: "shed", v3: "shed" },
+            "shine": { v2: "shone", v3: "shone" },
+            "shoe": { v2: "shod", v3: "shod" },
+            "shoot": { v2: "shot", v3: "shot" },
+            "show": { v2: "showed", v3: "shown/showed" },
+            "shrink": { v2: "shrank", v3: "shrunk" },
+            "shut": { v2: "shut", v3: "shut" },
+            "sing": { v2: "sang", v3: "sung" },
+            "sink": { v2: "sank", v3: "sunk" },
+            "sit": { v2: "sat", v3: "sat" },
+            "slay": { v2: "slew", v3: "slain" },
+            "sleep": { v2: "slept", v3: "slept" },
+            "slide": { v2: "slid", v3: "slid" },
+            "sling": { v2: "slung", v3: "slung" },
+            "slink": { v2: "slunk", v3: "slunk" },
+            "slit": { v2: "slit", v3: "slit" },
+            "smell": { v2: "smelt/smelled", v3: "smelt/smelled" },
+            "smite": { v2: "smote", v3: "smitten" },
+            "sneak": { v2: "snuck/sneaked", v3: "snuck/sneaked" },
+            "sow": { v2: "sowed", v3: "sown/sowed" },
+            "speak": { v2: "spoke", v3: "spoken" },
+            "speed": { v2: "sped", v3: "sped" },
+            "spell": { v2: "spelt/spelled", v3: "spelt/spelled" },
+            "spend": { v2: "spent", v3: "spent" },
+            "spill": { v2: "spilt/spilled", v3: "spilt/spilled" },
+            "spin": { v2: "spun", v3: "spun" },
+            "spit": { v2: "spat", v3: "spat" },
+            "split": { v2: "split", v3: "split" },
+            "spoil": { v2: "spoilt/spoiled", v3: "spoilt/spoiled" },
+            "spread": { v2: "spread", v3: "spread" },
+            "spring": { v2: "sprang", v3: "sprung" },
+            "stand": { v2: "stood", v3: "stood" },
+            "steal": { v2: "stole", v3: "stolen" },
+            "stick": { v2: "stuck", v3: "stuck" },
+            "sting": { v2: "stung", v3: "stung" },
+            "stink": { v2: "stank", v3: "stunk" },
+            "strew": { v2: "strewed", v3: "strewn/strewed" },
+            "stride": { v2: "strode", v3: "stridden" },
+            "strike": { v2: "struck", v3: "struck/stricken" },
+            "string": { v2: "strung", v3: "strung" },
+            "strive": { v2: "strove", v3: "striven" },
+            "swear": { v2: "swore", v3: "sworn" },
+            "sweat": { v2: "sweat/sweated", v3: "sweat/sweated" },
+            "sweep": { v2: "swept", v3: "swept" },
+            "swell": { v2: "swelled", v3: "swollen/swelled" },
+            "swim": { v2: "swam", v3: "swum" },
+            "swing": { v2: "swung", v3: "swung" },
+            "take": { v2: "took", v3: "taken" },
+            "teach": { v2: "taught", v3: "taught" },
+            "tear": { v2: "tore", v3: "torn" },
+            "tell": { v2: "told", v3: "told" },
+            "think": { v2: "thought", v3: "thought" },
+            "thrive": { v2: "throve/thrived", v3: "thriven/thrived" },
+            "throw": { v2: "threw", v3: "thrown" },
+            "thrust": { v2: "thrust", v3: "thrust" },
+            "tread": { v2: "trod", v3: "trodden/trod" },
+            "understand": { v2: "understood", v3: "understood" },
+            "uphold": { v2: "upheld", v3: "upheld" },
+            "upset": { v2: "upset", v3: "upset" },
+            "wake": { v2: "woke", v3: "woken" },
+            "wear": { v2: "wore", v3: "worn" },
+            "weave": { v2: "wove", v3: "woven" },
+            "wed": { v2: "wed/wedded", v3: "wed/wedded" },
+            "weep": { v2: "wept", v3: "wept" },
+            "wet": { v2: "wet/wetted", v3: "wet/wetted" },
+            "win": { v2: "won", v3: "won" },
+            "wind": { v2: "wound", v3: "wound" },
+            "withdraw": { v2: "withdrew", v3: "withdrawn" },
+            "withhold": { v2: "withheld", v3: "withheld" },
+            "withstand": { v2: "withstood", v3: "withstood" },
+            "wring": { v2: "wrung", v3: "wrung" },
+            "write": { v2: "wrote", v3: "written" }
+        };
+
+        // --- DOM Elements ---
+        const verbInput = document.getElementById('verbInput');
+        const checkButton = document.getElementById('checkButton');
+        const resultDiv = document.getElementById('result');
+
+        // --- Functions ---
+
+        /**
+         * Converts a regular verb to its past tense (V2) form.
+         * @param {string} verb - The base form of the verb.
+         * @returns {string} The past tense form of the verb.
+         */
+        function getRegularVerbV2(verb) {
+            const vowels = "aeiou";
+            const lastChar = verb.slice(-1);
+            const secondLastChar = verb.slice(-2, -1);
+
+            // Rule 1: Verb ends in 'e' -> add 'd'
+            if (lastChar === 'e') {
+                return verb + 'd';
+            }
+
+            // Rule 2: Verb ends in consonant + 'y' -> change 'y' to 'ied'
+            if (lastChar === 'y' && !vowels.includes(secondLastChar)) {
+                return verb.slice(0, -1) + 'ied';
+            }
+            
+            // Rule 3: One-syllable verb, ends in C-V-C -> double last consonant + 'ed'
+            // This is a simplified check that works for many common cases.
+            if (verb.length <= 4 && 
+                !vowels.includes(verb.slice(-3, -2)) && 
+                 vowels.includes(verb.slice(-2, -1)) && 
+                !vowels.includes(verb.slice(-1))) {
+                 // Exclude verbs ending in 'w', 'x', 'y'
+                 if (!['w', 'x', 'y'].includes(lastChar)) {
+                    return verb + lastChar + 'ed';
+                 }
+            }
+
+            // Default Rule: Add 'ed'
+            return verb + 'ed';
+        }
+
+        /**
+         * Displays the result in the result container.
+         * @param {string} htmlContent - The HTML content to display.
+         */
+        function displayResult(htmlContent) {
+            resultDiv.innerHTML = htmlContent;
+        }
+
+        /**
+         * Main function to check the verb and display results.
+         */
+        function checkVerb() {
+            const verb = verbInput.value.trim().toLowerCase();
+
+            if (!verb) {
+                displayResult(`<p class="text-red-500 font-medium">Vui lòng nhập một động từ.</p>`);
+                return;
+            }
+
+            // Check if it's an irregular verb
+            if (irregularVerbs.hasOwnProperty(verb)) {
+                const forms = irregularVerbs[verb];
+                const resultHTML = `
+                    <div class="text-center w-full">
+                        <p class="text-sm text-green-600 font-semibold mb-2 bg-green-100 px-3 py-1 rounded-full inline-block">ĐỘNG TỪ BẤT QUY TẮC</p>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div>
+                                <p class="text-xs text-gray-500">V1 (Hiện tại)</p>
+                                <p class="text-xl font-bold text-gray-800">${verb}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">V2 (Quá khứ)</p>
+                                <p class="text-xl font-bold text-blue-600">${forms.v2}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">V3 (Phân từ II)</p>
+                                <p class="text-xl font-bold text-blue-600">${forms.v3}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                displayResult(resultHTML);
+            } else {
+                // It's a regular verb
+                const v2 = getRegularVerbV2(verb);
+                const resultHTML = `
+                    <div class="text-center w-full">
+                        <p class="text-sm text-purple-600 font-semibold mb-2 bg-purple-100 px-3 py-1 rounded-full inline-block">ĐỘNG TỪ CÓ QUY TẮC</p>
+                        <div class="grid grid-cols-2 gap-2 text-center">
+                             <div>
+                                <p class="text-xs text-gray-500">V1 (Hiện tại)</p>
+                                <p class="text-xl font-bold text-gray-800">${verb}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">V2 / V3 (Quá khứ)</p>
+                                <p class="text-xl font-bold text-blue-600">${v2}</p>
+                            </div>
+                        </div>
+                         <p class="text-xs text-gray-400 mt-3">Đây là dạng chia theo quy tắc thông thường.</p>
+                    </div>
+                `;
+                displayResult(resultHTML);
+            }
+        }
+
+        // --- Event Listeners ---
+        checkButton.addEventListener('click', checkVerb);
+
+        // Allow pressing 'Enter' key to check
+        verbInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                checkButton.click();
+            }
+        });
+
+    </script>
+</body>
+</html>
