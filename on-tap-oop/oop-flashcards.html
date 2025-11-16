@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards Ôn tập OOP</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Tùy chỉnh font Inter làm font mặc định */
+        html {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* * Thiết lập cần thiết cho hiệu ứng lật 3D 
+         * - 'perspective' tạo không gian 3D cho thẻ con.
+         */
+        .flashcard-container {
+            perspective: 1000px;
+        }
+
+        /* * 'transform-style: preserve-3d' báo cho trình duyệt rằng
+         * các thẻ con (mặt trước, mặt sau) nên được đặt trong không gian 3D.
+         */
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.7s;
+            transform-style: preserve-3d;
+        }
+
+        /* * Khi container được 'hover' (hoặc click, qua JS), 
+         * thẻ 'card-inner' sẽ xoay 180 độ quanh trục Y.
+         */
+        .card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* * Các mặt của thẻ (trước và sau)
+         * - 'backface-visibility: hidden' để ẩn mặt sau của một thành phần
+         * khi nó quay đi (để không nhìn thấy "mặt sau" của mặt trước).
+         */
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; /* Safari */
+            backface-visibility: hidden;
+            border-radius: 0.75rem; /* rounded-xl */
+            
+            /* Cho phép cuộn nếu nội dung quá dài */
+            overflow-y: auto;
+        }
+
+        /* * Mặt sau (answer) phải được xoay 180 độ ngay từ đầu 
+         * để nó ở "đằng sau" mặt trước.
+         */
+        .card-face-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Định dạng bảng cho đẹp */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        th, td {
+            border: 1px solid #d1d5db; /* gray-300 */
+            padding: 0.75rem; /* p-3 */
+            text-align: left;
+        }
+        th {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        tr:nth-child(even) {
+            background-color: #f9fafb; /* gray-50 */
+        }
+        pre {
+            background-color: #1f2937; /* gray-800 */
+            color: #e5e7eb; /* gray-200 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: monospace;
+        }
+    </style>
+    <!-- Tải font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-3xl">
+        <h1 class="text-3xl font-bold text-center text-blue-700 mb-6">Ôn tập Lập trình Hướng đối tượng</h1>
+
+        <!-- Container cho thẻ flashcard -->
+        <div classs="w-full">
+            <!-- Thẻ này chứa logic 3D (perspective) -->
+            <div class="flashcard-container w-full h-[500px] cursor-pointer" id="flashcard">
+                <!-- Thẻ này sẽ xoay (rotate) -->
+                <div class="card-inner shadow-xl" id="card-inner">
+                    <!-- Mặt trước của thẻ (Câu hỏi) -->
+                    <div class="card-face card-face-front bg-white p-6 flex items-center justify-center text-center">
+                        <div id="card-question" class="text-2xl font-semibold text-gray-800"></div>
+                    </div>
+
+                    <!-- Mặt sau của thẻ (Câu trả lời) -->
+                    <div class="card-face card-face-back bg-blue-50 p-8 text-gray-700">
+                        <div id="card-answer" class="prose max-w-none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Điều hướng -->
+        <div class="flex items-center justify-between mt-8">
+            <button id="prev-button" class="bg-blue-600 text-white font-medium py-2 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                &larr; Trước
+            </button>
+            <div id="card-counter" class="text-lg font-medium text-gray-600"></div>
+            <button id="next-button" class="bg-blue-600 text-white font-medium py-2 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                Tiếp &rarr;
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DỮ LIỆU CÁC CÂU HỎI ---
+        // Dữ liệu được trích xuất từ văn bản bạn cung cấp và định dạng bằng HTML
+        const flashcardData = [
+            {
+                id: 1,
+                question: "Lập trình hướng đối tượng là gì?",
+                answer: `
+                    <p class="text-lg"><strong>Lập trình hướng đối tượng (OOP)</strong> là phương pháp lập trình lấy đối tượng làm nền tảng để xây dựng thuật giải, xây dựng chương trình.</p>
+                `
+            },
+            {
+                id: 2,
+                question: "Lớp là gì? Đối tượng là gì? Phân biệt lớp và đối tượng.",
+                answer: `
+                    <p><strong>Một đối tượng (Object)</strong> là một thực thể bao gồm thuộc tính (attributes) và hành động (methods).</p>
+                    <p><strong>Một lớp (Class)</strong> là nơi gom chung các đối tượng có các đặc tính tương tự nhau. Một lớp đối tượng đặc trưng bằng các thuộc tính và các thao tác.</p>
+                    <ul>
+                        <li><strong>Thuộc tính:</strong> một thành phần của đối tượng, có giá trị nhất định tại mỗi thời điểm.</li>
+                        <li><strong>Thao tác:</strong> thể hiện hành vi của một đối tượng, tác động qua lại với các đối tượng khác hoặc với chính nó.</li>
+                    </ul>
+                    <h4 class="font-bold mt-4 mb-2">Phân biệt Lớp và Đối tượng</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Lớp (Class)</th>
+                                <th>Đối tượng (Object)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Là một template (khuôn mẫu) chung, là một mô tả trừu tượng.</td>
+                                <td>Là một thể hiện (instance) của lớp.</td>
+                            </tr>
+                            <tr>
+                                <td>Chỉ được khai báo một lần.</td>
+                                <td>Có thể có nhiều đối tượng thuộc lớp.</td>
+                            </tr>
+                            <tr>
+                                <td>Khi khai báo thì không được cấp phát vùng nhớ.</td>
+                                <td>Khi khai báo (khởi tạo) thì được cấp phát vùng nhớ.</td>
+                            </tr>
+                            <tr>
+                                <td>Là một nhóm đối tượng giống nhau (danh từ chung, vd: Con Mèo).</td>
+                                <td>Là những đối tượng cụ thể có thật (danh từ riêng, vd: Mèo Mun).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `
+            },
+            {
+                id: 3,
+                question: "Trình bày các đặc điểm quan trọng của LTHĐT.",
+                answer: `
+                    <p>4 đặc điểm quan trọng của Lập trình Hướng đối tượng:</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>
+                            <strong>Trừu tượng hóa (Abstraction):</strong>
+                            Cách nhìn khái quát hóa về một tập các đối tượng có chung các đặc điểm được quan tâm (và bỏ qua những chi tiết không cần thiết).
+                        </li>
+                        <li>
+                            <strong>Đóng gói (Encapsulation):</strong>
+                            Nhóm những gì có liên quan với nhau vào làm một (dữ liệu và hàm xử lý), đồng thời che một số thông tin và chi tiết cài đặt nội bộ để bên ngoài không nhìn thấy.
+                        </li>
+                        <li>
+                            <strong>Thừa kế (Inheritance):</strong>
+                            Cho phép một lớp con (D) có được các thuộc tính và thao tác của lớp cha (C), như thể chúng đã được định nghĩa tại lớp D.
+                        </li>
+                        <li>
+                            <strong>Đa hình (Polymorphism):</strong>
+                            Cơ chế cho phép một tên thao tác (hàm) có thể được định nghĩa tại nhiều lớp và có thể có nhiều cài đặt (code) khác nhau tại mỗi lớp đó.
+                        </li>
+                    </ul>
+                `
+            },
+            {
+                id: 4,
+                question: "Cho biết ý nghĩa và mục đích của các hàm get/set trong một lớp.",
+                answer: `
+                    <p>Các hàm get/set dùng để thao tác với dữ liệu được khai báo trong phạm vi <strong>private</strong>:</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>
+                            <strong>Hàm Set (Setter):</strong>
+                            Dùng để <strong>thay đổi/gán giá trị</strong> cho thuộc tính private từ bên ngoài lớp. Mục đích quan trọng là để <strong>kiểm soát thông tin nhập vào</strong> (validation), đảm bảo dữ liệu luôn hợp lệ trước khi gán.
+                        </li>
+                        <li>
+                            <strong>Hàm Get (Getter):</strong>
+                            Dùng để <strong>lấy/truy xuất giá trị</strong> của thuộc tính private từ bên ngoài lớp.
+                        </li>
+                    </ul>
+                `
+            },
+            {
+                id: 5,
+                question: "Phân biệt các phạm vi truy cập private, protected và public.",
+                answer: `
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>
+                            <strong>Private:</strong>
+                            Mọi thành phần (thuộc tính, hàm) được khai báo trong private <strong>chỉ được truy xuất bên trong phạm vi lớp đó</strong> (và hàm bạn, lớp bạn). Lớp con không thể truy cập.
+                        </li>
+                        <li>
+                            <strong>Public:</strong>
+                            Mọi thành phần được khai báo trong public đều được <strong>truy xuất ở bất kỳ đâu</strong> (cả bên trong lẫn bên ngoài lớp).
+                        </li>
+                        <li>
+                            <strong>Protected:</strong>
+                            Giống như private (chỉ truy xuất được bên trong lớp), nhưng <strong>cho phép lớp con (lớp dẫn xuất) truy cập được</strong>.
+                        </li>
+                    </ul>
+                `
+            },
+            {
+                id: 6,
+                question: "Nêu khái niệm Constructor, Destructor. Phân biệt Constructor mặc định và các Constructor khác.",
+                answer: `
+                    <p><strong>Constructor (Hàm tạo/Hàm khởi tạo):</strong></p>
+                    <ul>
+                        <li>Là hàm dùng để <strong>khởi tạo giá trị</strong> cho đối tượng khi nó được tạo ra.</li>
+                        <li>Tên hàm trùng với tên lớp.</li>
+                        <li>Không có kiểu dữ liệu trả về.</li>
+                        <li>Một class có thể có nhiều constructor (nạp chồng - overload).</li>
+                        <li>Phải có thuộc tính public.</li>
+                    </ul>
+                    <p class="mt-4"><strong>Destructor (Hàm hủy):</strong></p>
+                    <ul>
+                        <li>Là hàm dùng để <strong>hủy đối tượng</strong> (giải phóng tài nguyên) khi hết phạm vi sử dụng.</li>
+                        <li>Tên hàm trùng tên lớp và có dấu <strong>~</strong> ở trước (ví dụ: ~MyClass).</li>
+                        <li>Không có kiểu dữ liệu trả về và không có tham số.</li>
+                        <li>Chỉ có <strong>duy nhất 1</strong> destructor trong class.</li>
+                        <li>Phải được khai báo ở nhãn public.</li>
+                    </ul>
+                    <h4 class="font-bold mt-4 mb-2">Phân biệt Constructor mặc định và Constructor khác</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Constructor mặc định</th>
+                                <th>Constructor khác (có tham số, sao chép)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Không có tham số truyền vào, hoặc tất cả tham số đều có giá trị mặc nhiên.</td>
+                                <td>Có một hoặc nhiều tham số đầu vào.</td>
+                            </tr>
+                            <tr>
+                                <td>Được tự động gọi khi tạo đối tượng mà không truyền tham số (vd: <code>MyClass obj;</code>).</td>
+                                <td>Được gọi khi tạo đối tượng và truyền tham số tương ứng (vd: <code>MyClass obj(10);</code>).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `
+            },
+            {
+                id: 7,
+                question: "Phân biệt các kiểu kế thừa private, protected và public.",
+                answer: `
+                    <p>Quy tắc chung: Thành phần <strong>private</strong> ở lớp cha thì <strong>không bao giờ</strong> truy xuất được ở lớp con (bất kể kiểu kế thừa nào).</p>
+                    <p>Kiểu kế thừa (từ khóa dẫn xuất) quy định phạm vi truy cập của thành phần <strong>public</strong> và <strong>protected</strong> của lớp cha khi chúng sang lớp con:</p>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kiểu kế thừa (Dẫn xuất)</th>
+                                <th>Thành phần <code>protected</code> của Cha</th>
+                                <th>Thành phần <code>public</code> của Cha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong><code>public</code></strong></td>
+                                <td>Trở thành <code>protected</code> của con</td>
+                                <td>Trở thành <code>public</code> của con</td>
+                            </tr>
+                            <tr>
+                                <td><strong><code>private</code></strong></td>
+                                <td>Trở thành <code>private</code> của con</td>
+                                <td>Trở thành <code>private</code> của con</td>
+                            </tr>
+                            <tr>
+                                <td><strong><code>protected</code></strong></td>
+                                <td>Trở thành <code>protected</code> của con</td>
+                                <td>Trở thành <code>protected</code> của con</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `
+            },
+            {
+                id: 8,
+                question: "Lớp cơ sở trừu tượng (Abstract Class) là gì? Được cài đặt trong C++ như thế nào?",
+                answer: `
+                    <p><strong>Lớp cơ sở trừu tượng (Abstract Class)</strong> là lớp chứa ít nhất một <strong>phương thức ảo thuần túy (pure virtual function)</strong>.</p>
+                    <ul>
+                        <li><strong>Phương thức ảo thuần túy</strong> là phương thức không có nội dung (không có code cài đặt) ở lớp cha, được khai báo với từ khóa <code>virtual</code> và <code>= 0</code>.</li>
+                        <li>Nó đóng vai trò là một "khuôn mẫu" bắt buộc các lớp con kế thừa phải tự định nghĩa (override) lại hàm đó.</li>
+                        <li>Lớp cơ sở trừu tượng <strong>không thể khởi tạo đối tượng</strong> trực tiếp từ nó.</li>
+                    </ul>
+                    <h4 class="font-bold mt-4 mb-2">Cài đặt trong C++</h4>
+<pre><code>// 'Shape' la lop co so truu tuong
+class Shape {
+public:
+    // Phuong thuc ao thuan tuy
+    virtual void draw() = 0; 
+    
+    virtual ~Shape() {} // Ham huy ao
+};
+
+// Lop con BUOC PHAI cai dat ham draw()
+class Circle : public Shape {
+public:
+    void draw() override {
+        // Code ve hinh tron
+    }
+};
+</code></pre>
+                `
+            },
+            {
+                id: 9,
+                question: "Phân biệt khái niệm Overload (Nạp chồng) và Override (Ghi đè).",
+                answer: `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Đặc điểm</th>
+                                <th>Overload (Nạp chồng)</th>
+                                <th>Override (Ghi đè)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Khái niệm</strong></td>
+                                <td>Nhiều phương thức <strong>trùng tên</strong> nhưng <strong>khác nhau về tham số</strong> (số lượng, kiểu dữ liệu).</td>
+                                <td>Lớp con cung cấp một triển khai (code) cụ thể cho một phương thức đã được định nghĩa ở lớp cha.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phạm vi</strong></td>
+                                <td>Xảy ra <strong>trong phạm vi cùng 1 class</strong>.</td>
+                                <td>Xảy ra giữa <strong>2 class có quan hệ kế thừa (Cha-Con)</strong>.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Danh sách tham số</strong></td>
+                                <td><strong>Bắt buộc phải khác nhau</strong>.</td>
+                                <td><strong>Bắt buộc phải giống hệt</strong> (tên hàm, tham số, kiểu trả về).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Từ khóa</strong></td>
+                                <td>Không cần.</td>
+                                <td>Cần <code>virtual</code> ở lớp cha và (nên có) <code>override</code> ở lớp con.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tính đa hình</strong></td>
+                                <td>Đa hình lúc <strong>biên dịch (Compile time)</strong>.</td>
+                                <td>Đa hình lúc <strong>thực thi (Run time)</strong>.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `
+            }
+        ];
+
+        // --- LOGIC ĐIỀU KHIỂN FLASHCARD ---
+
+        const card = document.getElementById('flashcard');
+        const cardInner = document.getElementById('card-inner');
+        const cardQuestion = document.getElementById('card-question');
+        const cardAnswer = document.getElementById('card-answer');
+        const cardCounter = document.getElementById('card-counter');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+
+        let currentCardIndex = 0;
+        let isFlipped = false;
+
+        // Hàm tải nội dung thẻ
+        function loadCard(index) {
+            if (index < 0 || index >= flashcardData.length) return;
+
+            const data = flashcardData[index];
+            cardQuestion.innerHTML = data.question;
+            cardAnswer.innerHTML = data.answer;
+            
+            // Cập nhật bộ đếm
+            cardCounter.textContent = `${index + 1} / ${flashcardData.length}`;
+            
+            // Reset trạng thái lật
+            if (isFlipped) {
+                cardInner.classList.remove('is-flipped');
+                isFlipped = false;
+            }
+        }
+
+        // Sự kiện lật thẻ khi click
+        card.addEventListener('click', () => {
+            cardInner.classList.toggle('is-flipped');
+            isFlipped = !isFlipped;
+        });
+
+        // Sự kiện nút "Tiếp"
+        nextButton.addEventListener('click', (e) => {
+            e.stopPropagation(); // Ngăn sự kiện click lan ra thẻ (gây lật thẻ)
+            currentCardIndex++;
+            if (currentCardIndex >= flashcardData.length) {
+                currentCardIndex = 0; // Quay vòng lại thẻ đầu tiên
+            }
+            loadCard(currentCardIndex);
+        });
+
+        // Sự kiện nút "Trước"
+        prevButton.addEventListener('click', (e) => {
+            e.stopPropagation(); // Ngăn sự kiện click lan ra thẻ
+            currentCardIndex--;
+            if (currentCardIndex < 0) {
+                currentCardIndex = flashcardData.length - 1; // Quay vòng lại thẻ cuối cùng
+            }
+            loadCard(currentCardIndex);
+        });
+
+        // Tải thẻ đầu tiên khi mở trang
+        loadCard(currentCardIndex);
+
+    </script>
+</body>
+</html>
